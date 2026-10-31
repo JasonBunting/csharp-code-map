@@ -520,9 +520,9 @@ public sealed class TokenSavingsBenchmark : IAsyncLifetime
                 CommitSha.From(new string('b', 40)));
             sw.Stop();
 
-            Console.WriteLine($"| 24 | Get baseline (cache hit) | N/A (time) | N/A | {sw.ElapsedMilliseconds}ms |");
-            Console.WriteLine($"  Task 24 note: wall time only — pull={sw.ElapsedMilliseconds}ms vs full compilation ~10-30s");
-            Console.WriteLine();
+            Out($"| 24 | Get baseline (cache hit) | N/A (time) | N/A | {sw.ElapsedMilliseconds}ms |");
+            Out($"  Task 24 note: wall time only — pull={sw.ElapsedMilliseconds}ms vs full compilation ~10-30s");
+            Out();
 
             pulled.Should().NotBeNull("task 24: cache pull must succeed (pre-populated in InitializeAsync)");
             sw.ElapsedMilliseconds.Should().BeLessOrEqualTo(500,
@@ -532,18 +532,25 @@ public sealed class TokenSavingsBenchmark : IAsyncLifetime
 
     private static void PrintSummaryTable(IReadOnlyList<BenchmarkResult> results)
     {
-        Console.WriteLine();
-        Console.WriteLine("| # | Task | Raw Tokens | CodeMap Tokens | Savings % |");
-        Console.WriteLine("|---|------|-----------|---------------|-----------|");
+        Out();
+        Out("| # | Task | Raw Tokens | CodeMap Tokens | Savings % |");
+        Out("|---|------|-----------|---------------|-----------|");
         int i = 1;
         foreach (var r in results)
-            Console.WriteLine($"| {i++} | {r.Task} | {r.RawTokens:N0} | {r.CodeMapTokens:N0} | {r.SavingsPercent:F1}% |");
+            Out($"| {i++} | {r.Task} | {r.RawTokens:N0} | {r.CodeMapTokens:N0} | {r.SavingsPercent:F1}% |");
 
         double avg = results.Average(r => r.SavingsPercent);
         int totalRaw = results.Sum(r => r.RawTokens);
         int totalCm = results.Sum(r => r.CodeMapTokens);
-        Console.WriteLine($"| AVG | — | {totalRaw:N0} | {totalCm:N0} | **{avg:F1}%** |");
-        Console.WriteLine();
+        Out($"| AVG | — | {totalRaw:N0} | {totalCm:N0} | **{avg:F1}%** |");
+        Out();
+    }
+
+    // Test Explorer shows TestContext output; Console output is lost under the Microsoft Testing Platform runner.
+    private static void Out(string line = "")
+    {
+        TestContext.Current.TestOutputHelper?.WriteLine(line);
+        Console.WriteLine(line);
     }
 
     private record BenchmarkResult(string Task, int RawTokens, int CodeMapTokens, double SavingsPercent);

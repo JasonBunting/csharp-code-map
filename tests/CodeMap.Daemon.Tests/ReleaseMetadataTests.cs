@@ -57,7 +57,9 @@ public sealed class ReleaseMetadataTests
     [Fact]
     public void CiWorkflow_UsesGlobalJson_NoHardcodedSdk()
     {
-        var ci = File.ReadAllText(Path.Combine(Root, ".github", "workflows", "ci.yml"));
+        var ciPath = Path.Combine(Root, ".github", "workflows", "ci.yml");
+        Assert.SkipUnless(File.Exists(ciPath), "no .github/workflows/ci.yml in this checkout (not mirrored to forks)");
+        var ci = File.ReadAllText(ciPath);
 
         ci.Should().Contain("global-json-file: global.json", "the SDK comes from global.json, one source");
         ci.Should().NotContain("dotnet-version:");

@@ -49,7 +49,7 @@ public sealed class AgentScratchRepo : IAsyncDisposable
         // --config writes core.longpaths into the clone, so every `worktree add` below inherits it.
         // Without it git refuses paths over 260 chars on Windows even when the OS allows them
         // (Bitwarden under a scratch prefix, PHASE-21-06 T02). No effect elsewhere.
-        await RunGitAsync(root, ct, "clone", "--quiet", "--no-checkout", "--local",
+        await RunGitAsync(root, ct, "clone", "--quiet", "--no-checkout", "--local", "--no-hardlinks",
                 "--config", "core.longpaths=true", sourceGitRoot, source)
             .ConfigureAwait(false);
         var sha = (await RunGitAsync(source, ct, "rev-parse", "HEAD").ConfigureAwait(false)).Trim();
